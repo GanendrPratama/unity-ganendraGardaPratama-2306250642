@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     Vector2 stopFriction;
     Rigidbody2D rb;
 
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -22,13 +23,6 @@ public class PlayerMovement : MonoBehaviour
         moveVelocity = 2 * maxSpeed / timeToFullSpeed;
         moveFriction = -2 * maxSpeed / new Vector2(Mathf.Pow(timeToFullSpeed.x, 2), Mathf.Pow(timeToFullSpeed.y, 2));
         stopFriction = -2 * maxSpeed / new Vector2(Mathf.Pow(timeToStop.x, 2), Mathf.Pow(timeToStop.y, 2));
-    }
-
-    void Update()
-    {
-        Move();
-        ApplyFriction();
-        //MoveBound();
     }
 
     public void Move()
@@ -39,38 +33,40 @@ public class PlayerMovement : MonoBehaviour
         float horizontalTranslation = Input.GetAxis("Horizontal") * xVelocity;
         float verticalTranslation = Input.GetAxis("Vertical") * yVelocity;
 
-        horizontalTranslation *= Time.deltaTime;
-        verticalTranslation *= Time.deltaTime;
+        horizontalTranslation *= Time.fixedDeltaTime;
+        verticalTranslation *= Time.fixedDeltaTime;
 
-        moveDirection = new Vector2(horizontalTranslation, verticalTranslation);
+        moveDirection = new Vector2(horizontalTranslation, verticalTranslation).normalized;
 
-        transform.Translate(horizontalTranslation, verticalTranslation, 0);
+        rb.linearVelocity = (moveVelocity + ApplyFriction()) * moveDirection;
     }
 
-    void ApplyFriction()
+    public Vector2 ApplyFriction()
     {
         if (moveDirection != Vector2.zero)
         {
             // Apply move friction
-            rb.linearVelocity += (moveVelocity + moveFriction) * moveDirection * Time.deltaTime;
+            return moveFriction;
         }
         else
         {
             // Apply stop friction
-            rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, stopFriction.x);
+            return stopFriction;
         }
     }
 
-    void MoveBound()
+    public void MoveBound()
     {
+        Vector3 screenBound = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
         Vector3 clampedPosition = transform.position;
-        clampedPosition.x = Mathf.Clamp(clampedPosition.x, minBoundary.x, maxBoundary.x);
-        clampedPosition.y = Mathf.Clamp(clampedPosition.y, minBoundary.y, maxBoundary.y);
+        clampedPosition.x = Mathf.Clamp(clampedPosition.x, screenBound.x * -1, screenBound.x);
+        clampedPosition.y = Mathf.Clamp(clampedPosition.y, screenBound.y * -1, maxBoundary.y);
         transform.position = clampedPosition;
     }
 
-    public bool isMoving()
+    public bool IsMoving()
     {
+        Debug.Log(moveDirection.x + " " + moveDirection.y);
         return moveDirection != Vector2.zero;
     }
 }

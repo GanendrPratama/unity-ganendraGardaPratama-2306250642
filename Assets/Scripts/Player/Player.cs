@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         playerMovement = GetComponent<PlayerMovement>();
-        animator = transform.Find("Engine/EngineEffect").GetComponent<Animator>();
+        animator = GameObject.Find("EngineEffect").GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
 
     void LateUpdate()
     {
-        animator.SetBool("IsMoving", playerMovement.isMoving());
+        animator.SetBool("IsMoving", playerMovement.IsMoving());
+        playerMovement.MoveBound();
     }
 }
