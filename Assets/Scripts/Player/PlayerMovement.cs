@@ -66,7 +66,7 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsMoving()
     {
-        Debug.Log(moveDirection.x + " " + moveDirection.y);
+        //Debug.Log(moveDirection.x + " " + moveDirection.y);
         return moveDirection != Vector2.zero;
     }
 }

@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WeaponPickup : MonoBehaviour
@@ -7,15 +8,13 @@ public class WeaponPickup : MonoBehaviour
 
     void Awake()
     {
-        weapon = weaponHolder;
+        weapon = Instantiate(weaponHolder);
     }
 
     void Start() 
     {
         if (weapon != null) {
-            Destroy(this);
-        } else {
-            DontDestroyOnLoad(this);
+            TurnVisual(false);
         }
     }
 
@@ -24,16 +23,29 @@ public class WeaponPickup : MonoBehaviour
         if (other.gameObject.CompareTag("Player")) {
             Debug.Log("PLAYER IS ENTERING ME");
             weapon.transform.SetParent(other.transform);
+            weapon.transform.position = other.transform.position;
+            TurnVisual(true);
+        } else {
+            Debug.Log("NOT A PLAYER");
         }
     }
 
     void TurnVisual(bool on)
     {
-
+        if (on) {
+            weapon.gameObject.SetActive(on);
+            gameObject.SetActive(!on);
+        } else {
+            weapon.gameObject.SetActive(false);
+        }
     }
 
     void TurnVisual(bool on, Weapon weapon)
     {
-
+        if (on) {
+            weapon.gameObject.SetActive(on);
+        } else {
+            weapon.gameObject.SetActive(false);
+        }
     }
 }
