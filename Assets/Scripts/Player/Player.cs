@@ -1,41 +1,62 @@
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class Player : MonoBehaviour
 {
-    public static Player Instance;
+    // This for getting the instace of Player Singleton
+    public static Player Instance { get; private set; }
 
+    // Getting the PlayerMovement methods
     PlayerMovement playerMovement;
+    // Animator
     Animator animator;
 
-    private void Awake()
+
+    // Key for Singleton
+    void Awake()
     {
-        // If there is an instance, and it's not me, delete myself.
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
+            return;
         }
-        else
-        {
-            Instance = this;
-        }
+
+        Instance = this;
+
+        DontDestroyOnLoad(gameObject);
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // Getting Component
     void Start()
     {
+        // Get PlayerMovement components
         playerMovement = GetComponent<PlayerMovement>();
+
+        // Get Animator components
         animator = GameObject.Find("EngineEffect").GetComponent<Animator>();
     }
 
-    // Update is called once per frame
+    // LateUpdate for animation related
+    void LateUpdate()
+    {
+        playerMovement.MoveBound();
+        animator.SetBool("IsMoving", playerMovement.IsMoving());
+    }
+
+    private WeaponPickup currentWeaponPickup;
+
+    public void SwitchWeapon(Weapon newWeapon, WeaponPickup newWeaponPickup)
+    {
+        if (currentWeaponPickup != null)
+        {
+            currentWeaponPickup.PickupHandler(true);  // Make the previous weapon pickup visible again
+        }
+        currentWeaponPickup = newWeaponPickup;
+    }
+
+    // Using FixedUpdate to Move because of physics
     void FixedUpdate()
     {
         playerMovement.Move();
-    }
-
-    void LateUpdate()
-    {
-        animator.SetBool("IsMoving", playerMovement.IsMoving());
-        playerMovement.MoveBound();
     }
 }
